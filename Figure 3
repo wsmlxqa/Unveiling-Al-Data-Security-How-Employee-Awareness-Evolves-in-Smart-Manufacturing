@@ -1,1 +1,68 @@
 
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+# Set font to Times New Roman and size to 16
+plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['font.size'] = 16
+plt.rcParams['axes.titlesize'] = 16
+plt.rcParams['axes.labelsize'] = 16
+plt.rcParams['xtick.labelsize'] = 16
+plt.rcParams['ytick.labelsize'] = 16
+
+# Colors for states 0, 1, 2
+colors = ['red', 'yellow', 'green']
+cmap = ListedColormap(colors)
+
+# Load the CSV files into numpy arrays
+initial_state = np.loadtxt('initial_state_matrix.csv', delimiter=',', dtype=int)
+no_intervention = np.loadtxt('no_intervention_matrix_t100.csv', delimiter=',', dtype=int)
+mild_promotion = np.loadtxt('mild_promotion_matrix_t100.csv', delimiter=',', dtype=int)
+mandatory_training = np.loadtxt('mandatory_training_matrix_t100.csv', delimiter=',', dtype=int)
+
+# Create figure with four subplots
+fig, axes = plt.subplots(2, 2, figsize=(12, 12), constrained_layout=True)
+
+# Subplot titles and labels
+titles = [
+    'Initial Distribution ($t=0$)',
+    'No Intervention ($t=100$)',
+    'Mild Promotion ($t=100$)',
+    'Mandatory Training ($t=100$)'
+]
+labels = ['(a)', '(b)', '(c)', '(d)']
+
+# Data list
+data_list = [initial_state, no_intervention, mild_promotion, mandatory_training]
+
+# Plot each heatmap
+for ax, data, title, label in zip(axes.flatten(), data_list, titles, labels):
+    im = ax.imshow(data, cmap=cmap, vmin=0, vmax=2)
+    ax.set_title(f'{label} {title}')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+# Add unified colorbar
+cbar = fig.colorbar(im, ax=axes, orientation='vertical', fraction=0.02, pad=0.04)
+cbar.set_ticks([0, 1, 2])
+cbar.set_label('Awareness State (S=0: Red, S=1: Yellow, S=2: Green)')
+
+# Save combined figure
+plt.savefig('state_distribution.png', dpi=300, bbox_inches='tight')
+plt.close()
+
+# Save individual subfigures
+for data, title, filename in zip(data_list, titles, ['initial_distribution.png', 'no_intervention_t100.png', 'mild_promotion_t100.png', 'mandatory_training_t100.png']):
+    plt.figure(figsize=(6, 6))
+    plt.imshow(data, cmap=cmap, vmin=0, vmax=2)
+    plt.title(title, family='Times New Roman')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.xticks([])
+    plt.yticks([])
+    plt.colorbar(ticks=[0, 1, 2], label='Awareness State (S=0: Red, S=1: Yellow, S=2: Green)')
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()

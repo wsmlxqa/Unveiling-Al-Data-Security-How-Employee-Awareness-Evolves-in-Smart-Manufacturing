@@ -1,0 +1,52 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Set font to Times New Roman and size to 12
+plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.unicode_minus'] = False  # Ensure minus signs display correctly
+
+# Load the aggregated data CSV (means and CIs)
+so_data = pd.read_csv('so_evolution_data.csv')
+
+# Extract data for plotting
+iterations = so_data['Iteration'].values
+no_intervention_mean = so_data['No_Intervention_Mean'].values
+no_intervention_ci = so_data['No_Intervention_CI'].values
+mild_propaganda_mean = so_data['Mild_Propaganda_Mean'].values
+mild_propaganda_ci = so_data['Mild_Propaganda_CI'].values
+mandatory_training_mean = so_data['Mandatory_Training_Mean'].values
+mandatory_training_ci = so_data['Mandatory_Training_CI'].values
+
+# Create the figure with adjusted size for legend
+fig, ax = plt.subplots(figsize=(8, 4), constrained_layout=True)  # Wider to accommodate legend
+
+# Plot data
+scenarios = [
+    ('No Intervention', no_intervention_mean, no_intervention_ci, 'blue'),
+    ('Mild Propaganda', mild_propaganda_mean, mild_propaganda_ci, 'orange'),
+    ('Mandatory Training', mandatory_training_mean, mandatory_training_ci, 'green')
+]
+
+for label, mean, ci, color in scenarios:
+    t = iterations
+    ax.plot(t, mean, label=label, color=color)
+    ax.fill_between(t, mean - ci, mean + ci, color=color, alpha=0.2)
+
+# Customize plot
+ax.set_title('Evolution of Overall AI Data Security Awareness Level ($S_o$)')
+ax.set_xlabel('Iteration')
+ax.set_ylabel('$S_o$')
+ax.set_ylim(35000, 65000)  # Adjusted to cover all data ranges
+ax.grid(True, linestyle='--', alpha=0.7)
+
+# Place the legend outside the plot on the right
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+
+# Adjust layout to ensure legend is not clipped
+plt.tight_layout()
+plt.savefig('overall_safety.png', dpi=300, bbox_inches='tight')
+plt.close()
+

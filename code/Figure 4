@@ -1,0 +1,60 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
+
+# Set Times New Roman as the default font
+plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.unicode_minus'] = False  # Ensure proper minus sign display
+
+# Parameters
+iterations = 100  # Number of iterations
+states = ['S=0', 'S=1', 'S=2']  # Awareness states
+colors = ['red', 'yellow', 'green']  # Colors for S=0, S=1, S=2
+scenarios = ['No Intervention', 'Mild Propaganda', 'Mandatory Training']
+labels = ['(a)', '(b)', '(c)']
+
+# Read the summary CSV
+summary_df = pd.read_csv('population_dynamics_summary.csv')
+
+# Initialize arrays to store mean and CI data
+data_list = []
+ci_list = []
+
+# Extract mean and CI for each scenario
+for scenario in scenarios:
+    scenario_data = summary_df[summary_df['Scenario'] == scenario]
+    mean_data = np.zeros((iterations, 3))
+    ci_data = np.zeros((iterations, 3))
+    for i, state in enumerate(states):
+        mean_data[:, i] = scenario_data[f'{state}_Mean'].values
+        ci_lower = scenario_data[f'{state}_CI_Lower'].values
+        ci_upper = scenario_data[f'{state}_CI_Upper'].values
+        ci_data[:, i] = (ci_upper - ci_lower) / 2  # CI width is half the difference
+    data_list.append(mean_data)
+    ci_list.append(ci_data)
+
+# Create the figure with three subplots
+fig, axes = plt.subplots(1, 3, figsize=(12, 4), constrained_layout=True)
+
+# Plot each subplot
+for ax, data, ci, title, label in zip(axes, data_list, ci_list, scenarios, labels):
+    t = np.arange(iterations)
+    for i, state in enumerate(states):
+        ax.plot(t, data[:, i], color=colors[i], label=state)
+        ax.fill_between(t, data[:, i] - ci[:, i], data[:, i] + ci[:, i],
+                        color=colors[i], alpha=0.2)
+    ax.set_title(f'{label} {title}')
+    ax.set_xlabel('Iteration')
+    ax.set_ylabel('Proportion')
+    ax.set_ylim(0, 0.8)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    if label == '(a)':
+        ax.legend()
+
+# Save the figure with high resolution
+plt.savefig('population_trend.png', dpi=300, bbox_inches='tight')
+plt.show()
+
